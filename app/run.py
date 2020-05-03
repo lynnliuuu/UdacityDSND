@@ -12,7 +12,6 @@ from sklearn.externals import joblib
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
-
 app = Flask(__name__)
 
 def tokenize(text):
@@ -27,12 +26,12 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///data/DisasterResponse.db')
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
 
 df = pd.read_sql_table('DisasterResponse', engine)
 
 # load model
-model = joblib.load("models/classifier.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -41,12 +40,19 @@ model = joblib.load("models/classifier.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
+    # graph1 - data
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
+
+    # graph2 - data
+    cate_df = df.iloc[:,3:].groupby('genre').sum().T
+
+    cate_idx = cate_df.index.to_list()
+    direct = cate_df['direct'].to_list()
+    news = cate_df['news'].to_list()
+    social = cate_df['social'].to_list()
     
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
         {
             'data': [
@@ -65,6 +71,41 @@ def index():
                     'title': "Genre"
                 }
             }
+
+        },
+        {
+            'data': [
+                Bar(name='direct',
+                    x=cate_idx,
+                    y=direct
+                ),
+                Bar(name='news',
+                    x=cate_idx,
+                    y=news
+
+                ),
+                Bar(name='social',
+                    x=cate_idx,
+                    y=social
+                )
+
+            ],
+
+            'layout': {
+               "height": 450,
+                'title': 'Distribution of Disaster Categories by Massage Genres',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': 'Disaster Category',
+                    'tickangle':-45,
+                    'categoryorder':'total descending',
+                    'automargin':True
+                },
+                'barmode':'stack',
+            }
+
         }
     ]
     
