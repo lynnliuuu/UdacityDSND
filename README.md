@@ -20,7 +20,7 @@
     - app/templates/master.html: 前端默认主页
     - app/templates/go.html: 前端消息查询结果页， 示例查询：Help! A child fell  into the water! 
 
-4. notbook文件
+4. notebook文件
     - models/ML Pipeline Preparation-zh.ipynb: ETL模块过程代码
     - data/ETL Pipeline Preparation-zh.ipynb: ML模块过程代码
 
