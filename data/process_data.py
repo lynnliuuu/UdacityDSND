@@ -6,6 +6,13 @@ import sys
 
 
 def load_data(messages_filepath, categories_filepath):
+    ''' 加载灾害消息数据文件
+    Args:
+        messages_filepat (csv): 灾害消息文件
+        categories_filepath (csv): 灾害消息分类标注文件
+    Returns:
+        df（pandas df）: 两个文件根据id合并成一个df
+    '''
     # load messages dataset
     messages = pd.read_csv(messages_filepath)
     # load categories dataset
@@ -16,6 +23,12 @@ def load_data(messages_filepath, categories_filepath):
     return df
 
 def clean_data(df):
+    ''' 清洗灾害消息数据
+    Args:
+        df（pandas df）: 原始灾害消息数据
+    Returns:
+        df（pandas df）: 清洗后的灾害消息数据，36类标注全部清洗为0/1变量
+    '''
     # create a dataframe of the 36 individual category columns
     categories = df.categories.str.split(";", expand=True)
     row = categories.head(1)
@@ -36,10 +49,20 @@ def clean_data(df):
     
     # drop duplicates
     df = df.drop_duplicates()
+
+    # raplace 2 with 1
+    df.related.replace(2,1,inplace=True)
     
     return df
 
 def save_data(df, database_filename):
+    ''' 将灾害数据存入数据库中
+    Args:
+        df（pandas df）: 原始灾害消息数据
+        database_filename: 指定的数据库文件路径
+    Returns:
+        无；创建了数据库，并向指定数据库中写入了表：DisasterResponse
+    '''
     engine = create_engine('sqlite:///{}'.format(database_filename))
     
     print(database_filename)
