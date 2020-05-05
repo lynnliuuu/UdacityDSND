@@ -23,10 +23,10 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 
 def load_data(database_filepath):
-    '''
-    Input:
+    ''' 加载数据
+    A'r'g's:
         database_filepath
-    Output:
+    Returns:
         X: pd.Series, 灾难消息序列
         y: df, 消息的灾难类别标注情况
         category_names:list, 灾难类别名称
@@ -39,10 +39,10 @@ def load_data(database_filepath):
     return X,y,category_names
 
 def tokenize(text): 
-    '''
-    Input:
+    ''' 提取文本关键词
+    Args:
         text: string, 一条灾难消息文本
-    Output:
+    Returns:
         clean_tokens: list, 文本清洗+token提取
     '''
     url_pat = "http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
@@ -63,34 +63,34 @@ def tokenize(text):
     return clean_tokens
 
 def build_model():
-    '''
-    Input:
+    ''' 模型训练
+    Args:
         无
-    Output:
+    Returns:
         model: 创建的模型
     '''
-    model = Pipeline([
+    model = Pipeline([ 
                     ('vect', CountVectorizer(tokenizer=tokenize)),
                     ('tfidf',TfidfTransformer()),
                     ('clf', MultiOutputClassifier(RandomForestClassifier()))
                 ])
 
     parameters = {
-        'clf__estimator__max_features': ['log2','sqrt'],
-        'clf__estimator__n_estimators': [100,200]
+        #'clf__estimator__max_features': ['log2'],
+        'clf__estimator__n_estimators':[50]
         }
-    #model = GridSearchCV(estimator=model, param_grid=parameters, cv=5)
+    model = GridSearchCV(estimator=model, param_grid=parameters, cv=5, n_jobs=1)
     return model
 
 
 def evaluate_model(model, X_test, y_test, category_names):
-    '''
-    Input:
+    '''模型评估
+    Args:
         model: 创建的模型
         X_test: 测试集X
         y_test: 测试集y
         category_names: 灾难类别名称
-    Output:
+    Returns:
         scores: df, 包括：每个灾难类别预测的 精确度，召回率，f1分数，真实值y的分布，预测值y的分布
     '''
     y_pred = model.predict(X_test)
@@ -110,11 +110,11 @@ def evaluate_model(model, X_test, y_test, category_names):
 
 
 def save_model(model, model_filepath):
-    '''
-    Input:
+    ''' 保存模型以备后续接口加载使用
+    Args:
         model:训练好的模型
         model_filepath: 要存入的文件路径
-    Output:
+    Returns:
         无，生成了一个训练好的模型文件
     '''
     with open(model_filepath,'wb') as fw:
@@ -148,5 +148,7 @@ def main():
               'train_classifier.py ../data/DisasterResponse.db classifier.pkl')
 
 
+import multiprocessing
 if __name__ == '__main__':
+    multiprocessing.set_start_method('forkserver')
     main()
